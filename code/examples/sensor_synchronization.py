@@ -90,7 +90,7 @@ queue = Queue()
 world.tick()
 
 camera_data = {'segmentation': None, 'depth': None}
-for i in range(2):
+for _ in range(2):
     name, data = queue.get(True, 1.0)
     camera_data[name] = data
 

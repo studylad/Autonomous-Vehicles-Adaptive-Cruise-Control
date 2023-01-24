@@ -45,12 +45,11 @@ class NavigationAssistant:
 
     # Executes one step of navigation.
     def run_step(self, hazard_detected, debug=False):
-        if hazard_detected:
-            control = self._emergency_stop()
-        else:
-            control = self._local_planner.run_step(debug=debug)
-
-        return control
+        return (
+            self._emergency_stop()
+            if hazard_detected
+            else self._local_planner.run_step(debug=debug)
+        )
 
     # Checks whether the vehicle reached its destination.
     def done(self):

@@ -58,11 +58,10 @@ start = time.time()
 
 while not agent.done():
     target_speed += 3
-    if target_speed > 65:
-        target_speed = 65
+    target_speed = min(target_speed, 65)
     agent.set_speed(target_speed)
 
-    for i in range(7):
+    for _ in range(7):
         world.tick()
         control = agent.run_step(False)
         vehicle.apply_control(control)

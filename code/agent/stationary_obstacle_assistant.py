@@ -26,12 +26,14 @@ class StationaryObstacleAssistant:
                 npc_vehicle_waypoint = self._world_map.get_waypoint(npc_vehicle_location)
 
                 # Checking if the npc vehicle is located on the lane with the agent's vehicle.
-                if npc_vehicle_waypoint.road_id == vehicle_waypoint.road_id and \
-                        npc_vehicle_waypoint.lane_id == vehicle_waypoint.lane_id:
-
-                    # Checking if the npc vehicle is close to the agent's vehicle.
-                    if is_within_distance_ahead(npc_vehicle.get_transform(),
-                                                self._vehicle.get_transform(),
-                                                self._proximity_vehicle_threshold):
-                        return True
+                if (
+                    npc_vehicle_waypoint.road_id == vehicle_waypoint.road_id
+                    and npc_vehicle_waypoint.lane_id == vehicle_waypoint.lane_id
+                    and is_within_distance_ahead(
+                        npc_vehicle.get_transform(),
+                        self._vehicle.get_transform(),
+                        self._proximity_vehicle_threshold,
+                    )
+                ):
+                    return True
         return False

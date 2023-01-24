@@ -214,7 +214,7 @@ class Simulator:
 
         # Waits until valid data from all sensors are gathered.
         while sensor_data_dict[SensorType.SEGMENTATION_CAMERA] is None or \
-                sensor_data_dict[SensorType.DEPTH_CAMERA] is None:
+                    sensor_data_dict[SensorType.DEPTH_CAMERA] is None:
 
             self._world.tick()
             control = self._navigation_assistant.run_step(hazard_detected)
@@ -235,8 +235,11 @@ class Simulator:
         observation = image_data_utils.get_normalized_depth_of_vehicles(depth_frame, obstacle_indices)
 
         if self._log_dir:
-            cv2.imwrite(self._log_dir + 'segmentation_' + str(self._step) + '.png', segmentation_frame)
-            cv2.imwrite(self._log_dir + 'depth_' + str(self._step) + '.png', depth_frame)
+            cv2.imwrite(
+                f'{self._log_dir}segmentation_{str(self._step)}.png',
+                segmentation_frame,
+            )
+            cv2.imwrite(f'{self._log_dir}depth_{str(self._step)}.png', depth_frame)
 
         return observation, collision
 
@@ -249,8 +252,7 @@ class Simulator:
 
             if collision:
                 self._collision_detected = collision
-                for j in range(i + 1, self.num_of_frames):
-                    observation.append(obs_frame)
+                observation.extend(obs_frame for _ in range(i + 1, self.num_of_frames))
                 break
 
         # Computing distance from the front vehicle.
@@ -259,7 +261,10 @@ class Simulator:
         if self._log_dir:
             for i in range(self.num_of_frames):
                 observation_image = observation[i] * 255
-                cv2.imwrite(self._log_dir + 'observation_' + str(self._step) + '_' + str(i) + '.png', observation_image)
+                cv2.imwrite(
+                    f'{self._log_dir}observation_{str(self._step)}_{str(i)}.png',
+                    observation_image,
+                )
 
         return np.float32(observation)
 
@@ -284,22 +289,17 @@ class Simulator:
         self._target_speed = 0
         self._step = 0
 
-        # Constructing an observation.
-        observation = self._get_observation(hazard_detected=False)
-
-        return observation
+        return self._get_observation(hazard_detected=False)
 
     # Executes a step in the environment.
     def step(self, state):
-        # Checking whether there are stationary vehicles ahead.
-        stationary_obstacle_detected = self._stationary_obstacle_assistant.detect_stationary_vehicle_ahead()
-        while stationary_obstacle_detected:
+        while (
+            stationary_obstacle_detected := self._stationary_obstacle_assistant.detect_stationary_vehicle_ahead()
+        ):
             self._world.tick()
             self._target_speed = 0
             control = self._navigation_assistant.run_step(hazard_detected=True)
             self._vehicle.apply_control(control)
-            stationary_obstacle_detected = self._stationary_obstacle_assistant.detect_stationary_vehicle_ahead()
-
         hazard_detected = state == AgentState.DANGER
         if state == AgentState.DANGER:
             self._target_speed = 0
@@ -319,7 +319,7 @@ class Simulator:
         # Executing a step. Waits some time before taking next action.
         self._navigation_assistant.set_speed(self._target_speed)
 
-        for i in range(self._waiting_steps):
+        for _ in range(self._waiting_steps):
             self._world.tick()
             control = self._navigation_assistant.run_step(hazard_detected)
             self._vehicle.apply_control(control)
