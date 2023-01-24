@@ -77,13 +77,12 @@ class CarlaEnvironment(PyEnvironment):
         observation, reward, self._done = self._env.step(state)
 
         self._target_speed_sum += self._env.get_speed()
-        if self._done:
-            step = self._env.get_step()
-            self._num_of_episode_steps.append(step)
-            self._episode_mean_target_speed.append(self._target_speed_sum / step)
-            return time_step.termination(observation=observation, reward=reward)
-        else:
+        if not self._done:
             return time_step.transition(observation=observation, reward=reward, discount=self.discount_rate)
+        step = self._env.get_step()
+        self._num_of_episode_steps.append(step)
+        self._episode_mean_target_speed.append(self._target_speed_sum / step)
+        return time_step.termination(observation=observation, reward=reward)
 
     def close(self):
         self._env.close()

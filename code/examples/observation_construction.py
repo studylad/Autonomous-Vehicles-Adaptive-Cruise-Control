@@ -119,9 +119,9 @@ for i in range(3):
     vehicle_indices = image_data_utils.get_vehicle_indices(seg_data)
     observation = image_data_utils.get_normalized_depth_of_vehicles(dep_data, vehicle_indices)
 
-    cv2.imshow('segmentation' + str(i), seg_data)
-    cv2.imshow('depth' + str(i), dep_data)
-    cv2.imshow('observation' + str(i), observation)
+    cv2.imshow(f'segmentation{str(i)}', seg_data)
+    cv2.imshow(f'depth{str(i)}', dep_data)
+    cv2.imshow(f'observation{str(i)}', observation)
     print(image_data_utils.get_front_vehicle_distance(observation))
 
 end = time.time()
@@ -131,7 +131,7 @@ cv2.waitKey()
 cv2.destroyAllWindows()
 
 start = time.time()
-for i in range(5):
+for _ in range(5):
     world.tick()
     control = navigator.run_step(False)
     vehicle.apply_control(control)

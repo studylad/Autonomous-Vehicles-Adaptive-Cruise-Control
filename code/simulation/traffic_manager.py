@@ -83,7 +83,7 @@ class TrafficManager:
         z = sp.location.z
         rotation = sp.rotation
 
-        for i in range(6):
+        for _ in range(6):
             x += 6
             self._vehicle_spawn_points.append( carla.Transform(carla.Location(x, y, z), rotation) )
             self._num_of_vehicles += 1
@@ -92,13 +92,14 @@ class TrafficManager:
     def spawn_vehicles(self):
         # Choosing random blueprints.
         random_vehicle_blueprints = random.choices(population=self._vehicle_blueprint_list, k=self._num_of_vehicles)
-        batch = []
-
-        # Spawns vehicles.
-        for blueprint, spawn_point in zip(random_vehicle_blueprints, self._vehicle_spawn_points):
-            batch.append(SpawnActor(blueprint, spawn_point)
-                         .then( SetAutopilot( FutureActor, True, self._traffic_manager.get_port() ) ) )
-
+        batch = [
+            SpawnActor(blueprint, spawn_point).then(
+                SetAutopilot(FutureActor, True, self._traffic_manager.get_port())
+            )
+            for blueprint, spawn_point in zip(
+                random_vehicle_blueprints, self._vehicle_spawn_points
+            )
+        ]
         command_responses = self._client.apply_batch_sync(batch, self._sync)
 
         vehicle_ids = [response.actor_id for response in command_responses]

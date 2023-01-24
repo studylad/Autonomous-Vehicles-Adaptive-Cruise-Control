@@ -131,7 +131,7 @@ class ShowProgress:
         if not trajectory.is_boundary():
             self.counter += 1
         if self.counter % 1000 == 0:
-            print("\r{}/{}".format(self.counter, self.total), end="")
+            print(f"\r{self.counter}/{self.total}", end="")
 
 
 init_driver = DynamicStepDriver(
@@ -175,24 +175,23 @@ def train_agent(num_steps, checkpointer):
     dataset_iter = iter(dataset)
 
     for step in range(num_steps+1):
-        current_metrics = []
-
         time_step, policy_state = collect_driver.run(time_step, policy_state)
         trajectories, buffer_info = next(dataset_iter)
 
         train_loss = agent.train(trajectories)
         all_train_loss.append( train_loss.loss.numpy() )
 
-        for i in range( len(train_metrics) ):
-            current_metrics.append(train_metrics[i].result().numpy())
-
+        current_metrics = [
+            train_metrics[i].result().numpy()
+            for i in range(len(train_metrics))
+        ]
         all_metrics.append(current_metrics)
 
         if step % 1000 == 0:
             print( "\nIteration: {}, loss:{:.2f}".format( step, train_loss.loss.numpy() ) )
 
             for i in range( len(train_metrics) ):
-                print( '{}: {}'.format( train_metrics[i].name, train_metrics[i].result().numpy() ) )
+                print(f'{train_metrics[i].name}: {train_metrics[i].result().numpy()}')
 
         if step % 10000 == 0:
             checkpointer.save(step)
